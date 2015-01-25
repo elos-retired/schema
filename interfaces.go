@@ -51,6 +51,7 @@ type Model interface {
 	Updateable
 
 	Schema() Schema
+	DBType() data.DBType
 }
 
 type Nameable interface {

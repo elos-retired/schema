@@ -60,7 +60,15 @@ func UnlinkWith(ln LinkKind, this Model, that Model) error {
 	return nil
 }
 
+func Compatible(this Model, that Model) bool {
+	return this.DBType() == that.DBType()
+}
+
 func (s *RelationshipMap) Link(this Model, that Model) error {
+	if !Compatible(this, that) {
+		return IncompatibleModelsError
+	}
+
 	thisLinkType, err := s.LinkType(this, that)
 
 	if err != nil {
@@ -85,7 +93,12 @@ func (s *RelationshipMap) Link(this Model, that Model) error {
 }
 
 func (s *RelationshipMap) Unlink(this Model, that Model) error {
+	if !Compatible(this, that) {
+		return IncompatibleModelsError
+	}
+
 	thisLinkType, err := s.LinkType(this, that)
+
 	if err != nil {
 		return err
 	} else {
