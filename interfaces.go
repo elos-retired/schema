@@ -10,12 +10,19 @@ type Linker interface {
 	Unlink(Model, Model) error
 }
 
+type Linkable interface {
+	LinkOne(Model)
+	LinkMul(Model)
+	UnlinkOne(Model)
+	UnlinkMul(Model)
+}
+
 type Validateable interface {
 	Valid() bool
 }
 
 type Versioned interface {
-	GetVersion() int
+	Version() int
 }
 
 type Schema interface {
@@ -25,20 +32,13 @@ type Schema interface {
 }
 
 type Createable interface {
+	CreatedAt() time.Time
 	SetCreatedAt(time.Time)
-	GetCreatedAt() time.Time
 }
 
 type Updateable interface {
+	UpdatedAt() time.Time
 	SetUpdatedAt(time.Time)
-	GetUpdatedAt() time.Time
-}
-
-type Linkable interface {
-	LinkOne(Model)
-	LinkMul(Model)
-	UnlinkOne(Model)
-	UnlinkMul(Model)
 }
 
 type Model interface {
@@ -51,17 +51,16 @@ type Model interface {
 	Updateable
 
 	Schema() Schema
-	DBType() data.DBType
 }
 
 type Nameable interface {
+	Name() string
 	SetName(string)
-	GetName() string
 }
 
 type Timeable interface {
+	StartTime() time.Time
 	SetStartTime(time.Time)
-	GetStartTime() time.Time
+	EndTime() time.Time
 	SetEndTime(time.Time)
-	GetEndTime() time.Time
 }

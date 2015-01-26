@@ -25,13 +25,13 @@ func (s *RelationshipMap) Valid() bool {
 	return true
 }
 
-type VersionedRelationshipMap struct {
+type versionedRelationshipMap struct {
 	*RelationshipMap
 	version int
 }
 
 func NewSchema(sm *RelationshipMap, version int) (Schema, error) {
-	s := &VersionedRelationshipMap{
+	s := &versionedRelationshipMap{
 		RelationshipMap: sm,
 		version:         version,
 	}
@@ -43,6 +43,6 @@ func NewSchema(sm *RelationshipMap, version int) (Schema, error) {
 	return s, nil
 }
 
-func (s *VersionedRelationshipMap) GetVersion() int {
+func (s *versionedRelationshipMap) Version() int {
 	return s.version
 }
