@@ -4,8 +4,10 @@ import (
 	"errors"
 )
 
-var UndefinedKindError = errors.New("Error: undefined kind")
-var UndefinedLinkError = errors.New("Error: undefined link")
-var UndefinedLinkKindError = errors.New("Error: undefined link kind")
-var InvalidSchemaError = errors.New("Error: invalid schema")
-var IncompatibleModelsError = errors.New("Error: incompatible models")
+var (
+	ErrUndefinedKind      = errors.New("undefined kind")
+	ErrUndefinedLink      = errors.New("undefined link")
+	ErrUndefinedLinkKind  = errors.New("undefined link mind")
+	ErrInvalidSchema      = errors.New("invalid schema")
+	ErrIncompatibleModels = errors.New("incompatible models")
+)

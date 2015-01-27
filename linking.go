@@ -1,17 +1,12 @@
 package schema
 
-type LinkKind string
-
-const MulLink LinkKind = "MANY"
-const OneLink LinkKind = "ONE"
-
-func PossibleLink(s *RelationshipMap, this Model, other Model) (bool, error) {
+func possibleLink(s *RelationshipMap, this Model, other Model) (bool, error) {
 	thisKind := this.Kind()
 
 	links, ok := (*s)[thisKind]
 
 	if !ok {
-		return false, UndefinedKindError
+		return false, ErrUndefinedKind
 	}
 
 	otherKind := other.Kind()
@@ -19,14 +14,14 @@ func PossibleLink(s *RelationshipMap, this Model, other Model) (bool, error) {
 	_, linkPossible := links[otherKind]
 
 	if !linkPossible {
-		return false, UndefinedLinkError
+		return false, ErrUndefinedLink
 	}
 
 	return true, nil
 }
 
-func (s *RelationshipMap) LinkType(this Model, other Model) (LinkKind, error) {
-	_, err := PossibleLink(s, this, other)
+func (s *RelationshipMap) linkType(this Model, other Model) (LinkKind, error) {
+	_, err := possibleLink(s, this, other)
 	if err != nil {
 		return "", err
 	}
@@ -34,27 +29,27 @@ func (s *RelationshipMap) LinkType(this Model, other Model) (LinkKind, error) {
 	return (*s)[this.Kind()][other.Kind()], nil
 }
 
-func LinkWith(lk LinkKind, this Model, that Model) error {
+func linkWith(lk LinkKind, this Model, that Model) error {
 	switch lk {
 	case MulLink:
 		this.LinkMul(that)
 	case OneLink:
 		this.LinkOne(that)
 	default:
-		return UndefinedLinkKindError
+		return ErrUndefinedLinkKind
 	}
 
 	return nil
 }
 
-func UnlinkWith(ln LinkKind, this Model, that Model) error {
+func unlinkWith(ln LinkKind, this Model, that Model) error {
 	switch ln {
 	case MulLink:
 		this.UnlinkMul(that)
 	case OneLink:
 		this.UnlinkOne(that)
 	default:
-		return UndefinedLinkKindError
+		return ErrUndefinedLinkKind
 	}
 
 	return nil
@@ -66,25 +61,25 @@ func Compatible(this Model, that Model) bool {
 
 func (s *RelationshipMap) Link(this Model, that Model) error {
 	if !Compatible(this, that) {
-		return IncompatibleModelsError
+		return ErrIncompatibleModels
 	}
 
-	thisLinkType, err := s.LinkType(this, that)
+	thisLinkType, err := s.linkType(this, that)
 
 	if err != nil {
 		return err
 	} else {
-		if err = LinkWith(thisLinkType, this, that); err != nil {
+		if err = linkWith(thisLinkType, this, that); err != nil {
 			return err
 		}
 	}
 
-	thatLinkType, err := s.LinkType(that, this)
+	thatLinkType, err := s.linkType(that, this)
 
 	if err != nil {
 		return err
 	} else {
-		if err = LinkWith(thatLinkType, that, this); err != nil {
+		if err = linkWith(thatLinkType, that, this); err != nil {
 			return err
 		}
 	}
@@ -94,25 +89,25 @@ func (s *RelationshipMap) Link(this Model, that Model) error {
 
 func (s *RelationshipMap) Unlink(this Model, that Model) error {
 	if !Compatible(this, that) {
-		return IncompatibleModelsError
+		return ErrIncompatibleModels
 	}
 
-	thisLinkType, err := s.LinkType(this, that)
+	thisLinkType, err := s.linkType(this, that)
 
 	if err != nil {
 		return err
 	} else {
-		if err = UnlinkWith(thisLinkType, this, that); err != nil {
+		if err = unlinkWith(thisLinkType, this, that); err != nil {
 			return err
 		}
 	}
 
-	thatLinkType, err := s.LinkType(that, this)
+	thatLinkType, err := s.linkType(that, this)
 
 	if err != nil {
 		return err
 	} else {
-		if err = UnlinkWith(thatLinkType, that, this); err != nil {
+		if err = unlinkWith(thatLinkType, that, this); err != nil {
 			return err
 		}
 	}

@@ -4,9 +4,16 @@ import (
 	"github.com/elos/data"
 )
 
+type LinkKind string
+
+const (
+	MulLink LinkKind = "MANY"
+	OneLink LinkKind = "ONE"
+)
+
 type RelationshipMap map[data.Kind]map[data.Kind]LinkKind
 
-func (s *RelationshipMap) Valid() bool {
+func (s *RelationshipMap) valid() bool {
 	for outerKind, links := range *s {
 		for innerKind, _ /*linkKind*/ := range links {
 			innerLinks, ok := (*s)[innerKind]
@@ -36,8 +43,8 @@ func NewSchema(sm *RelationshipMap, version int) (Schema, error) {
 		version:         version,
 	}
 
-	if !s.Valid() {
-		return nil, InvalidSchemaError
+	if !s.valid() {
+		return nil, ErrInvalidSchema
 	}
 
 	return s, nil

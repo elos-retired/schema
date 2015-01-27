@@ -27,7 +27,6 @@ type Versioned interface {
 
 type Schema interface {
 	Linker
-	Validateable
 	Versioned
 }
 
@@ -52,6 +51,8 @@ type Model interface {
 
 	Schema() Schema
 }
+
+// === Common model patterns ===
 
 type Nameable interface {
 	Name() string
