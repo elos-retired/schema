@@ -1,6 +1,9 @@
 package schema
 
 import (
+	"encoding/json"
+	"sync"
+
 	"github.com/elos/data"
 )
 
@@ -32,14 +35,21 @@ func (s *RelationshipMap) valid() bool {
 	return true
 }
 
+type ModelConstructor func() Model
+
 type versionedRelationshipMap struct {
 	*RelationshipMap
-	version int
+	registered map[data.Kind]ModelConstructor
+	version    int
+	data.DB
+
+	sync.Mutex
 }
 
 func NewSchema(sm *RelationshipMap, version int) (Schema, error) {
 	s := &versionedRelationshipMap{
 		RelationshipMap: sm,
+		registered:      make(map[data.Kind]ModelConstructor),
 		version:         version,
 	}
 
@@ -52,4 +62,33 @@ func NewSchema(sm *RelationshipMap, version int) (Schema, error) {
 
 func (s *versionedRelationshipMap) Version() int {
 	return s.version
+}
+
+func (s *versionedRelationshipMap) Register(k data.Kind, c ModelConstructor) {
+	s.Lock()
+	defer s.Unlock()
+
+	s.registered[k] = c
+}
+
+func (s *versionedRelationshipMap) ModelFor(kind data.Kind) (Model, error) {
+	s.Lock()
+	defer s.Unlock()
+	c, ok := s.registered[kind]
+
+	if !ok {
+		return nil, ErrUndefinedKind
+	}
+
+	return c(), nil
+}
+
+func (s *versionedRelationshipMap) Unmarshal(k data.Kind, attrs data.AttrMap) (Model, error) {
+	bytes, _ := json.Marshal(attrs)
+	m, err := s.ModelFor(k)
+	if err != nil {
+		return m, err
+	}
+
+	return m, json.Unmarshal(bytes, m)
 }

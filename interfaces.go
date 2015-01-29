@@ -28,6 +28,11 @@ type Versioned interface {
 type Schema interface {
 	Linker
 	Versioned
+	data.DB
+
+	Register(data.Kind, ModelConstructor)
+	ModelFor(data.Kind) (Model, error)
+	Unmarshal(data.Kind, data.AttrMap) (Model, error)
 }
 
 type Createable interface {
